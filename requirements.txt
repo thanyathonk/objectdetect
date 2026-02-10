@@ -1,0 +1,38 @@
+# Core
+numpy
+pandas
+matplotlib
+tqdm
+pyyaml
+
+# Deep Learning (PyTorch)
+torch
+torchvision
+torchaudio
+
+# Computer Vision
+opencv-python
+Pillow
+
+# Object Detection / Utils
+ultralytics
+scikit-learn
+
+# Visualization / Logging
+seaborn
+tensorboard
+
+# Export / Deployment
+onnx
+onnxruntime
+torchinfo
+
+# Optional (for dataset annotation tools / augmentation)
+albumentations
+labelme
+
+# For Jupyter
+jupyter
+ipykernel
+cvzone
+filterpy
