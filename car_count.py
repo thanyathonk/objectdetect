@@ -97,6 +97,9 @@ mask = cv2.imread("./image/mask.png")
 # Tracking
 Tracker = Sort(max_age=20, min_hits=3, iou_threshold=0.3)
 
+limits = [400, 297, 673, 297]
+totalCount = []
+
 if not cap.isOpened():
     print("Error: Could not open webcam.")
     exit()
@@ -111,6 +114,9 @@ while True:
     imgRegion = cv2.bitwise_and(img, mask_resized)
     result = model(imgRegion, stream=True)
     detections = np.empty((0, 5))
+    
+    imgGraphics = cv2.imread('./image/graphics.png', cv2.IMREAD_UNCHANGED)
+    img = cvzone.overlayPNG(img, imgGraphics, (0,0))
 
     for r in result:
         boxes = r.boxes
@@ -139,17 +145,18 @@ while True:
                 #     thickness=1,
                 #     offset=3,
                 # )
-                cvzone.cornerRect(img, (x1, y1, w, h), l=9, rt=5)
+                # cvzone.cornerRect(img, (x1, y1, w, h), l=9, rt=5)
                 currentArray = np.array([x1, y1, x2, y2, conf])
                 detections = np.vstack((detections, currentArray))
 
     resultsTracker = Tracker.update(detections)
+    cv2.line(img, (limits[0], limits[1]), (limits[2], limits[3]), (0, 0, 255), 5)
 
     for result in resultsTracker:
-        x1, y1, x2, y2, id = map(int,result)
+        x1, y1, x2, y2, id = map(int, result)
         print(result)
         w, h = x2 - x1, y2 - y1
-        cvzone.cornerRect(img, (x1, y1, w, h), l=9, rt=3, colorR=(255,0,0))
+        cvzone.cornerRect(img, (x1, y1, w, h), l=9, rt=3, colorR=(255, 0, 0))
         cvzone.putTextRect(
             img,
             f"{id}",
@@ -159,8 +166,21 @@ while True:
             offset=3,
         )
 
+        # point for counting
+        cx, cy = x1 + w // 2, y1 + w // 2
+        cv2.circle(img, (cx, cy), 5, (255, 0, 255), cv2.FILLED)
+
+        if limits[0] < cx < limits[2] and limits[1] - 15 < cy < limits[1] + 15:
+            # totalCount += 1
+            if totalCount.count(id) == 0:
+                totalCount.append(id)
+                cv2.line(img, (limits[0], limits[1]), (limits[2], limits[3]), (0,255,0), 5)
+
+    # cvzone.putTextRect(img,f"Count: {len(totalCount)}",(50, 50),)
+    cv2.putText(img, f'{len(totalCount)}', (255,100), cv2.FONT_HERSHEY_PLAIN, 5, (50,50,255), 8)
     cv2.imshow("Image", img)
     # cv2.imshow("ImageRegion", imgRegion)
+
     if cv2.waitKey(0) & 0xFF == ord("q"):
         break
 
